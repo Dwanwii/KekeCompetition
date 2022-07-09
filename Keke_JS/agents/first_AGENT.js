@@ -84,7 +84,7 @@ class Node {
 	const child = new Node(childMap, nextActions, parent, won, died);
 	return child;
   }
-  
+
   function getChildren(parent, map) {
 	const children = [];
 	for (let i = 0, j = possActions.length; i < j; i += 1) {
@@ -95,6 +95,65 @@ class Node {
 	}
 	return children;
   }
+
+  const aStar = function (grafo, heuristica, start, goal) {
+
+    //contiene las distancias desde el nodo inicial a todos los nodos
+    var distancias = [];
+    for (var i = 0; i < grafo.length; i++) distancias[i] = Number.MAX_VALUE;
+    //la distancia del nodo inicial a sí mismo es 0
+    distancias[start] = 0;
+
+    //conntiene las prioridades con los nodos visitados, una vez calculada la heuristica.
+    var prioridades = [];
+    //Inicializa con prioridad de infinito
+    for (var i = 0; i < grafo.length; i++) priorities[i] = Number.MAX_VALUE;
+    //el nodo inicial tiene un valor igual a  distancia en línea recta a la meta. Será el primero en ser ampliado.
+    prioridades[start] = heuristica[start][goal];
+
+    //contiene los nodos ya visitados
+    var visitados = [];
+
+    //será verdadero mientras queden nodos por visitar
+    while (true) {
+
+        // ... find the node with the currently lowest priority...
+        var bajaPrioridad = Number.MAX_VALUE;
+        var bajaPrioridadIndex = -1;
+        for (var i = 0; i < prioridades.length; i++) {
+            //... by going through all nodes that haven't been visited yet
+            if (prioridades[i] < bajaPrioridad && !visitados[i]) {
+                bajaPrioridad = prioridades[i];
+                bajaPrioridadIndex = i;
+            }
+        }
+
+        if (bajaPrioridadIndex === -1) {
+            // No había ningún nodo no visitado --> Nodo no encontrado
+            return -1;
+        } else if (bajaPrioridadIndex === goal) {
+            // console.log("Goal node found!");
+            return distancias[bajaPrioridadIndex];
+        }
+
+
+        for (var i = 0; i < grafo[bajaPrioridadIndex].length; i++) {
+            if (grafo[bajaPrioridadIndex][i] !== 0 && !visitados[i]) {
+                //...if the path over this edge is shorter...
+                if (distancias[bajaPrioridadIndex] + grafo[bajaPrioridadIndex][i] < distancias[i]) {
+                    //guardar esta ruta como nueva ruta corta
+                    distancias[i] = distancias[bajaPrioridadIndex] + grafo[bajaPrioridadIndex][i];
+                    //...establece la prioridad con la que debemos continuar con este nodo
+                    prioridades[i] = distancias[i] + heuristica[i][goal];
+                }
+            }
+        }
+
+        //por ultimo, note that we are finished with this node.
+        visitados[bajaPrioridadIndex] = true;
+    
+    	}
+	}
   
   // NEXT ITERATION STEP FOR SOLVING
   function iterSolve(initState) {
@@ -111,6 +170,8 @@ class Node {
 	// return a sequence of actions or empty list
 	return [];
   }
+
+
   
   function initStack(initState) {
 	const parent = new Node(simjs.map2Str(initState.orig_map), [], null, false, false);
@@ -123,6 +184,8 @@ class Node {
 	init(initState) { initStack(initState); },
 	best_sol() { return (stack.length > 1 ? stack.shift().actionHistory : []); },
   };
+
+
 
 
 
